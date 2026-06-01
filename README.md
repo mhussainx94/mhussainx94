@@ -1,6 +1,6 @@
 # Hi, I'm Muhammad Hussain 👋
 
-### Cybersecurity Consultant | Vulnerability Assessment · Security Audits · Policy Writing
+Pursuing Career in Cybersecurity | Cybersecurity Professional | Vulnerability Assessment & Security Audits | Helping Businesses Find & Fix Security Gaps | OWASP | Freelance
 
 I help businesses and startups find and fix security vulnerabilities **before attackers do** — through professional assessments, clear reports, and actionable remediation plans.
 
@@ -57,9 +57,9 @@ I help businesses and startups find and fix security vulnerabilities **before at
 
 I'm available for freelance vulnerability assessments, security audits, and policy writing.
 
-[![Fiverr](https://img.shields.io/badge/Fiverr-1DBF73?style=for-the-badge&logo=fiverr&logoColor=white)](https://www.fiverr.com/YOURUSERNAME)
+[![Fiverr](https://img.shields.io/badge/Fiverr-1DBF73?style=for-the-badge&logo=fiverr&logoColor=white)](https://www.fiverr.com/mhussainx94)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/mhussainx94/)
-[![Email](https://img.shields.io/badge/Email-EA4335?style=for-the-badge&logo=gmail&logoColor=white)](mailto:YOUREMAIL@gmail.com)
+[![Email](https://img.shields.io/badge/Email-EA4335?style=for-the-badge&logo=gmail&logoColor=white)](mailto:mhussainx94@gmail.com)
 
 ---
 
