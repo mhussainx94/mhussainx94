@@ -48,9 +48,7 @@ I help businesses and startups find and fix security vulnerabilities **before at
 
 ## 📊 GitHub Stats
 
-![Muhammad's GitHub stats](https://github-readme-stats.vercel.app/api?username=mhussainx94&show_icons=true&theme=dark&hide_border=true&count_private=true)
-![Top Languages](https://github-readme-stats.vercel.app/api/top-langs/?username=mhussainx94&layout=compact&theme=dark&hide_border=true)
-
+![GitHub Streak](https://streak-stats.demolab.com?user=mhussainx94&theme=dark&hide_border=true)
 ---
 
 ## 🤝 Hire Me
