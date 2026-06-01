@@ -40,9 +40,9 @@ I help businesses and startups find and fix security vulnerabilities **before at
 
 | Repository | What it is |
 |---|---|
-| [security-portfolio](https://github.com/mhussainx94/security-portfolio) | Real sample reports, assessment checklists & methodology |
-| [web-header-checker](https://github.com/mhussainx94/web-header-checker) | Python tool — scans any URL for missing security headers |
-| [security-policy-templates](https://github.com/mhussainx94/security-policy-templates) | Free ISO 27001 aligned policy templates for businesses |
+| [onion-web-crawler](https://github.com/mhussainx94/onion-web-crawler) | Python-based Tor dark web crawler for onion sites |
+| [odoo-security-scanner](https://github.com/mhussainx94/odoo-security-scanner) | Automated security scanner for Odoo web applications that analyzes ports, SSL/TLS configuration, security headers, service exposure, and generates risk reports. |
+
 
 ---
 
