@@ -27,7 +27,7 @@ import urllib.request
 from pathlib import Path
 
 import numpy as np
-from PIL import Image, ImageFilter, ImageOps
+from PIL import Image, ImageFilter, ImageOps, UnidentifiedImageError, ImageEnhance
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -63,7 +63,16 @@ def ease_in_out(x: np.ndarray) -> np.ndarray:
 
 def load_image(path: Path | None, url: str | None, label: str) -> Image.Image:
     if path is not None and path.exists():
-        return Image.open(path)
+        try:
+            with Image.open(path) as source:
+                if source.format not in ("PNG", "JPEG", "WEBP"):
+                    raise ValueError(f"unsupported {label} format: {source.format}")
+                source.load()
+                if min(source.size) < 2:
+                    raise ValueError(f"invalid {label} dimensions: {source.size}")
+                return ImageOps.exif_transpose(source).copy()
+        except (OSError, ValueError, UnidentifiedImageError) as exc:
+            sys.exit(f"[error] cannot load {label} {path}: {exc}")
     if url:
         print(f"[info] {label}: {path} not found, downloading {url}")
         req = urllib.request.Request(url, headers={"User-Agent": "identity-particle/1.0"})
@@ -180,28 +189,57 @@ def silhouette_mask(rgb: Image.Image) -> np.ndarray | None:
     return np.asarray(m.filter(ImageFilter.GaussianBlur(5))).astype(np.float32) / 255.0
 
 
+def prepare_portrait(img: Image.Image, crop: tuple[int, int, int, int] | None) -> Image.Image:
+    """One shared crop and scale for particles AND the photographic layer."""
+    img = ImageOps.exif_transpose(img).convert("RGB")
+    iw, ih = img.size
+    if crop is not None:
+        x, y, w, h = crop
+        if w <= 0 or h <= 0 or x < 0 or y < 0 or x + w > iw or y + h > ih:
+            raise ValueError(f"crop {crop} is outside source image {img.size}")
+        img = img.crop((x, y, x + w, y + h))
+    else:
+        side = min(iw, ih)
+        img = img.crop(((iw-side)//2, (ih-side)//2, (iw+side)//2, (ih+side)//2))
+    return img.resize((512, 512), Image.Resampling.LANCZOS)
+
+
+def photographic_layer(img: Image.Image, invert: bool = False) -> Image.Image:
+    """Preserve real facial detail; remove near-black studio background without a vignette."""
+    gray = ImageOps.autocontrast(img.convert("L"), cutoff=0.5)
+    gray = ImageEnhance.Contrast(gray).enhance(1.10)
+    arr = np.asarray(gray, dtype=np.float32) / 255.0
+    rgb = np.asarray(img, dtype=np.float32) / 255.0
+    # Black background suppression is photometric, never radial/elliptical.
+    foreground = smoothstep((rgb.max(axis=2) - 0.025) / 0.10)
+    if invert:
+        arr = 1.0 - arr
+    # Dark features remain dark, rather than becoming bright point clusters.
+    luminance = np.clip(arr * foreground, 0, 1)
+    target = np.asarray(BG, dtype=np.float32)[None, None, :]
+    image = target + luminance[..., None] * (np.asarray(SILVER, dtype=np.float32) - target)
+    image = Image.fromarray(np.uint8(np.clip(image, 0, 255)), "RGB")
+    side = int(round(FIELD * SIZE))
+    canvas = Image.new("RGB", (SIZE, SIZE), BG)
+    image = image.resize((side, side), Image.Resampling.LANCZOS)
+    canvas.paste(image, ((SIZE-side)//2, (SIZE-side)//2))
+    return canvas
+
+
 def portrait_density(img: Image.Image, crop: tuple[int, int, int, int] | None,
                      invert: bool, silhouette: bool = False) -> tuple[np.ndarray, np.ndarray]:
     """Return (density map, luminance map), both 512x512 float32 in [0,1]."""
-    img = ImageOps.exif_transpose(img).convert("RGB")
-    if crop:
-        x, y, w, h = crop
-        img = img.crop((x, y, x + w, y + h))
-    else:
-        w, h = img.size
-        s = min(w, h)
-        img = img.crop(((w - s) // 2, (h - s) // 2, (w - s) // 2 + s, (h - s) // 2 + s))
-    img = img.resize((512, 512), Image.LANCZOS)
+    img = prepare_portrait(img, crop)
     g = ImageOps.autocontrast(img.convert("L"), cutoff=1)
-    g = ImageOps.equalize(g)                                   # global tone spread
+    # Avoid global equalization, which turns low-light noise into white speckles.
     lum = np.asarray(g).astype(np.float32) / 255.0
     # local contrast boost (unsharp) recovers facial structure from flat photos
     blur = np.asarray(g.filter(ImageFilter.GaussianBlur(14))).astype(np.float32) / 255.0
-    lum = np.clip(lum + 0.9 * (lum - blur), 0, 1)
+    lum = np.clip(lum + 0.30 * (lum - blur), 0, 1)
     if invert:
         lum = 1.0 - lum
     edge = np.asarray(g.filter(ImageFilter.GaussianBlur(1.2)).filter(ImageFilter.FIND_EDGES)).astype(np.float32) / 255.0
-    edge = np.clip(edge * 3.0, 0, 1)
+    edge = np.clip(edge * 1.6, 0, 1)
     # Foreground isolation without an artificial circular/elliptical vignette.
     # Use the original RGB image to distinguish the near-black background from the
     # subject, before global histogram equalization brightens background noise.
@@ -221,9 +259,9 @@ def portrait_density(img: Image.Image, crop: tuple[int, int, int, int] | None,
     # A broad soft facial PRIOR, not a clipping mask: shoulders stay visible.
     face_prior = np.exp(-0.5 * (((xx - 256) / 118) ** 2 +
                                 ((yy - 202) / 145) ** 2))
-    weight = 0.55 + 2.4 * face_prior
+    weight = 0.35 + 3.0 * face_prior
     weighted_edges = edge * foreground
-    density = ((0.55 * lum ** 1.5 + 1.45 * weighted_edges) *
+    density = ((0.45 * lum ** 1.5 + 1.05 * weighted_edges) *
                foreground * weight)
     if sil is not None:
         rim = np.asarray(
@@ -325,7 +363,7 @@ def palette() -> list[int]:
     return pal
 
 
-def build_frames(logo_pts, portrait_pts, portrait_bright, rng) -> list[Image.Image]:
+def build_frames(logo_pts, portrait_pts, portrait_bright, rng, photo: Image.Image, preview_only: bool = False) -> list[Image.Image]:
     n = len(logo_pts)
     perm = match(logo_pts, portrait_pts)
     p_pts = portrait_pts[perm]
@@ -353,8 +391,9 @@ def build_frames(logo_pts, portrait_pts, portrait_bright, rng) -> list[Image.Ima
               ("portrait", T_PORTRAIT_HOLD), ("dissolve2", T_DISSOLVE_2), ("recon", T_RECON)]
     total = sum(d for _, d in phases)
     frames_n = int(round(total * FPS))
+    selected = [0, next(i for i in range(frames_n) if i / FPS >= sum(d for _, d in phases[:3]) + T_PORTRAIT_HOLD / 2)] if preview_only else range(frames_n)
     frames: list[Image.Image] = []
-    for f in range(frames_n):
+    for f in selected:
         t = f / FPS
         acc = 0.0
         for name, dur in phases:
@@ -378,7 +417,19 @@ def build_frames(logo_pts, portrait_pts, portrait_bright, rng) -> list[Image.Ima
         else:  # recon
             pos = segment(cloud2, logo_pts, u, delay, swirl, bend)
             br = cloud_b + (logo_b - cloud_b) * smoothstep(u)
-        frames.append(render(pos.astype(np.float32), br.astype(np.float32)))
+        particle_frame = render(pos.astype(np.float32), br.astype(np.float32)).convert("RGB")
+        # A smooth, genuine photographic reveal, sharing the particle crop/scale.
+        photo_alpha = 0.0
+        if name == "form":
+            photo_alpha = 0.94 * float(smoothstep(np.asarray((u - 0.38) / 0.62)))
+        elif name == "portrait":
+            photo_alpha = 0.94
+        elif name == "dissolve2":
+            photo_alpha = 0.94 * (1.0 - float(smoothstep(np.asarray(min(1.0, u / 0.65)))))
+        if photo_alpha > 0:
+            particle_frame = Image.blend(particle_frame, photo, photo_alpha)
+        # GIF frames share a fixed palette; preview uses the identical compositing path.
+        frames.append(particle_frame.quantize(palette=render(pos[:0], br[:0]), dither=Image.Dither.NONE))
     return frames
 
 
@@ -394,6 +445,7 @@ def main() -> None:
     ap.add_argument("--silhouette", action="store_true",
                     help="weight head+shoulders by an automatic silhouette mask (needs a fairly plain background)")
     ap.add_argument("--out", type=Path, default=ROOT / "assets/identity-particle.gif")
+    ap.add_argument("--preview-only", action="store_true", help="save logo and finished portrait previews, no GIF")
     ap.add_argument("--check-only", action="store_true", help="print portrait quality report and exit")
     ap.add_argument("--allow-low-quality", action="store_true", help="do not stop on portrait quality warnings")
     args = ap.parse_args()
@@ -415,7 +467,13 @@ def main() -> None:
         sys.exit("[stop] portrait quality is likely too low for a recognisable result. "
                  "Provide a better photo or re-run with --allow-low-quality.")
 
-    crop = tuple(int(v) for v in args.portrait_crop.split(",")) if args.portrait_crop else None
+    try:
+        crop = tuple(int(v) for v in args.portrait_crop.split(",")) if args.portrait_crop else None
+        if crop is not None and len(crop) != 4:
+            raise ValueError("crop must contain exactly x,y,w,h")
+        prepared = prepare_portrait(portrait, crop)
+    except ValueError as exc:
+        sys.exit(f"[error] invalid portrait crop: {exc}")
     rng = np.random.default_rng(SEED)
 
     logo = load_image(args.logo, args.logo_url, "kali logo")
@@ -423,10 +481,24 @@ def main() -> None:
     dens, lum = portrait_density(portrait, crop, args.portrait_invert, args.silhouette)
     p_pts, p_bright = sample_portrait(dens, lum, N_PARTICLES, rng)
 
-    frames = build_frames(l_pts, p_pts, p_bright, rng)
+    photo = photographic_layer(prepared, args.portrait_invert)
+    frames = build_frames(l_pts, p_pts, p_bright, rng, photo, args.preview_only)
+    if args.preview_only:
+        try:
+            directory = ROOT / "assets"
+            directory.mkdir(parents=True, exist_ok=True)
+            frames[0].convert("RGB").save(directory / "preview-logo.png")
+            frames[1].convert("RGB").save(directory / "preview-portrait.png")
+        except OSError as exc:
+            sys.exit(f"[error] preview writing failed: {exc}")
+        print(f"[done] previews written to {directory}")
+        return
     args.out.parent.mkdir(parents=True, exist_ok=True)
-    frames[0].save(args.out, save_all=True, append_images=frames[1:], duration=int(1000 / FPS),
-                   loop=0, optimize=False, disposal=1)
+    try:
+        frames[0].save(args.out, save_all=True, append_images=frames[1:], duration=int(1000 / FPS),
+                       loop=0, optimize=False, disposal=1)
+    except OSError as exc:
+        sys.exit(f"[error] GIF writing failed: {exc}")
     kb = args.out.stat().st_size / 1024
     print(f"[done] {args.out}  {len(frames)} frames @ {FPS} fps = {len(frames) / FPS:.1f}s  {kb:.0f} KB")
 
