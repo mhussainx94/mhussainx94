@@ -32,8 +32,8 @@ from PIL import Image, ImageFilter, ImageOps
 ROOT = Path(__file__).resolve().parent.parent
 
 # ---------------------------------------------------------------- configuration
-SIZE = 420                 # output is SIZE x SIZE
-N_PARTICLES = 6500
+SIZE = 512                 # square output; logo remains particle-rendered
+N_PARTICLES = 10000
 FPS = 16
 SEED = 94956               # fixed seed -> reproducible output
 FIELD = 0.80               # fraction of the canvas the logo/portrait occupies
@@ -158,7 +158,7 @@ def silhouette_mask(rgb: Image.Image) -> np.ndarray | None:
     background. The background colour is estimated from the top and side borders (the
     bottom is skipped because shoulders reach it), pixels far from it are foreground,
     then the mask is cleaned with median/closing filters. Returns None when the result
-    is implausible (so the caller can fall back to the elliptical vignette)."""
+    is implausible (so the caller can fall back to brightness-based isolation)."""
     a = np.asarray(rgb).astype(np.float32)
     b = 28
     border = np.concatenate([a[:b].reshape(-1, 3), a[:, :b].reshape(-1, 3), a[:, -b:].reshape(-1, 3)])
@@ -215,19 +215,26 @@ def portrait_density(img: Image.Image, crop: tuple[int, int, int, int] | None,
     if sil is not None:
         foreground = np.maximum(foreground, 0.80 * sil)
 
-    # Prevent background edges from becoming particles; emphasize facial edges
-    # within the foreground and keep lower-density areas for tonal recognition.
+    # Preserve features in the central face. Avoid interpreting shoulders as a
+    # more important target merely because they occupy more image area.
+    yy, xx = np.mgrid[0:512, 0:512].astype(np.float32)
+    # A broad soft facial PRIOR, not a clipping mask: shoulders stay visible.
+    face_prior = np.exp(-0.5 * (((xx - 256) / 118) ** 2 +
+                                ((yy - 202) / 145) ** 2))
+    weight = 0.55 + 2.4 * face_prior
     weighted_edges = edge * foreground
-    density = (0.72 * lum ** 1.9 + 0.9 * weighted_edges) * foreground
-
-    # Detectable contours still get particles even when dark (hair, jaw, clothing).
+    density = ((0.55 * lum ** 1.5 + 1.45 * weighted_edges) *
+               foreground * weight)
     if sil is not None:
         rim = np.asarray(
             Image.fromarray((sil * 255).astype(np.uint8))
             .filter(ImageFilter.FIND_EDGES)
         ).astype(np.float32) / 255.0
-        density += 0.30 * rim * foreground
+        density += 0.28 * rim * foreground
+
     density = np.maximum(density, 0.0)
+    if not np.isfinite(density).all() or density.sum() <= 0:
+        sys.exit("[error] portrait foreground is empty; use a well-lit portrait")
     return density.astype(np.float32), (lum * foreground).astype(np.float32)
 
 
@@ -336,7 +343,8 @@ def build_frames(logo_pts, portrait_pts, portrait_bright, rng) -> list[Image.Ima
     phase = rng.uniform(0, 2 * np.pi, n).astype(np.float32)
     logo_b = np.clip(rng.normal(0.9, 0.08, n), 0.55, 1.0).astype(np.float32)
     cloud_b = np.full(n, 0.55, np.float32)
-    p_b = (0.35 + 0.65 * p_bright).astype(np.float32)
+    # Boost midtone differentiation without turning dark facial features white.
+    p_b = (0.17 + 0.83 * np.clip(p_bright, 0, 1) ** 0.75).astype(np.float32)
 
     def hold(pts, k, t):
         return pts + np.stack([np.sin(t * 2.1 + phase), np.cos(t * 1.7 + phase)], 1) * k
