@@ -202,23 +202,33 @@ def portrait_density(img: Image.Image, crop: tuple[int, int, int, int] | None,
         lum = 1.0 - lum
     edge = np.asarray(g.filter(ImageFilter.GaussianBlur(1.2)).filter(ImageFilter.FIND_EDGES)).astype(np.float32) / 255.0
     edge = np.clip(edge * 3.0, 0, 1)
-    # soft elliptical vignette: keep the head, drop the corners
-    yy, xx = np.mgrid[0:512, 0:512].astype(np.float32)
-    r = np.sqrt(((xx - 256) / 236) ** 2 + ((yy - 250) / 252) ** 2)
-    vignette = 1.0 - smoothstep((r - 0.82) / 0.18)
+    # Foreground isolation without an artificial circular/elliptical vignette.
+    # Use the original RGB image to distinguish the near-black background from the
+    # subject, before global histogram equalization brightens background noise.
+    rgb = np.asarray(img).astype(np.float32) / 255.0
+    original_brightness = np.max(rgb, axis=2)
+    foreground = smoothstep((original_brightness - 0.035) / 0.14)
+
+    # Optional silhouette extraction can retain dark clothes and hair against a
+    # uniform background. Fall back to luminance-based isolation when unavailable.
     sil = silhouette_mask(img) if silhouette else None
     if sil is not None:
-        # keep head + shoulders, damp the background, and add a rim along the outline so
-        # the silhouette itself is drawn in particles
-        rim = np.asarray(Image.fromarray((sil * 255).astype(np.uint8)).filter(ImageFilter.FIND_EDGES)).astype(np.float32) / 255.0
-        rim = np.clip(rim * 3.0, 0, 1)
-        soft = 0.12 + 0.88 * sil
-        # inside the silhouette add a small base density so dark hair/clothing still read
-        density = (0.85 * lum ** 2.2 + 0.60 * edge + 0.22 * sil) * soft + 0.45 * rim
-        density *= 1.0 - smoothstep((np.sqrt(((xx - 256) / 300) ** 2 + ((yy - 256) / 300) ** 2) - 0.9) / 0.1)
-        return density.astype(np.float32), (lum * (0.35 + 0.65 * sil)).astype(np.float32)
-    density = (0.85 * lum ** 2.2 + 0.60 * edge) * vignette
-    return density.astype(np.float32), (lum * vignette).astype(np.float32)
+        foreground = np.maximum(foreground, 0.80 * sil)
+
+    # Prevent background edges from becoming particles; emphasize facial edges
+    # within the foreground and keep lower-density areas for tonal recognition.
+    weighted_edges = edge * foreground
+    density = (0.72 * lum ** 1.9 + 0.9 * weighted_edges) * foreground
+
+    # Detectable contours still get particles even when dark (hair, jaw, clothing).
+    if sil is not None:
+        rim = np.asarray(
+            Image.fromarray((sil * 255).astype(np.uint8))
+            .filter(ImageFilter.FIND_EDGES)
+        ).astype(np.float32) / 255.0
+        density += 0.30 * rim * foreground
+    density = np.maximum(density, 0.0)
+    return density.astype(np.float32), (lum * foreground).astype(np.float32)
 
 
 def sample_portrait(density: np.ndarray, lum: np.ndarray, n: int,
