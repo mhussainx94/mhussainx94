@@ -13,7 +13,7 @@
 
 **Cybersecurity-focused Computer Science student** working toward penetration testing and application security through a hands-on lab, security tooling, vulnerability assessment and documented practice.
 
-`Web Security` · `Application Security` · `Vulnerability Assessment` · `Penetration Testing`
+`Web Application Security` · `Penetration Testing` · `Vulnerability Assessment` · `OWASP Top 10` · `Burp Suite` · `OWASP ZAP` · `Nmap` · `Linux` · `Python` · `Bash` · `Docker` · `Security Automation`
 
 </td>
 </tr>
