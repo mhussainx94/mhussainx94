@@ -23,26 +23,11 @@
 
 <br>
 
-```text
-$ whoami
-muhammad-hussain
+<div align="center">
 
-$ focus
-web-security
-application-security
-penetration-testing
-vulnerability-assessment
+<img src="assets/security-terminal.svg" width="900" alt="Security terminal dashboard showing Muhammad Hussain, cybersecurity focus, toolkit and active project status" />
 
-$ environment
-kali-linux
-linux
-burp-suite
-python
-security-labs
-
-$ status
-building // testing // documenting
-```
+</div>
 
 ---
 
