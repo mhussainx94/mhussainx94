@@ -37,9 +37,9 @@ FACE_CENTER_Y = 0.40
 FACE_REGION_WIDTH = 0.46
 FACE_REGION_HEIGHT = 0.57
 FACE_IMPORTANCE = 2.6
-PORTRAIT_PHOTO_OPACITY = 0.88
-FACIAL_DETAIL_STRENGTH = 1.25
-PARTICLE_OVERLAY_OPACITY = 0.28
+PORTRAIT_PHOTO_OPACITY = 1.00
+FACIAL_DETAIL_STRENGTH = 1.40
+PARTICLE_OVERLAY_OPACITY = 0.10
 
 def validate_tuning():
     vals = (FACE_CENTER_X, FACE_CENTER_Y, FACE_REGION_WIDTH, FACE_REGION_HEIGHT, FACE_IMPORTANCE, PORTRAIT_PHOTO_OPACITY, FACIAL_DETAIL_STRENGTH, PARTICLE_OVERLAY_OPACITY)
@@ -453,7 +453,8 @@ def build_frames(logo_pts, portrait_pts, portrait_bright, rng, photo: Image.Imag
             photo_alpha = float(np.clip(photo_alpha, 0, 1))
             particle_frame = Image.blend(particle_frame, photo, photo_alpha)
             if name == "portrait":
-                # Preserve the original dark eye/mouth pixels against bright particles.
+                # Keep only a faint particle overlay in the completed portrait:
+                # this protects dark eyes, nostrils and lips from bright speckles.
                 particle_frame = Image.blend(particle_frame, photo, 1 - PARTICLE_OVERLAY_OPACITY)
 
         # GIF frames share a fixed palette; preview uses the identical compositing path.
