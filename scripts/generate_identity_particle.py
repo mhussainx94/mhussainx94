@@ -31,6 +31,28 @@ from PIL import Image, ImageFilter, ImageOps, UnidentifiedImageError, ImageEnhan
 
 ROOT = Path(__file__).resolve().parent.parent
 
+# Face region coordinates are normalized within the square source crop.
+FACE_CENTER_X = 0.50
+FACE_CENTER_Y = 0.40
+FACE_REGION_WIDTH = 0.46
+FACE_REGION_HEIGHT = 0.57
+FACE_IMPORTANCE = 2.6
+PORTRAIT_PHOTO_OPACITY = 0.88
+FACIAL_DETAIL_STRENGTH = 1.25
+PARTICLE_OVERLAY_OPACITY = 0.28
+
+def validate_tuning():
+    vals = (FACE_CENTER_X, FACE_CENTER_Y, FACE_REGION_WIDTH, FACE_REGION_HEIGHT, FACE_IMPORTANCE, PORTRAIT_PHOTO_OPACITY, FACIAL_DETAIL_STRENGTH, PARTICLE_OVERLAY_OPACITY)
+    if not all(np.isfinite(v) for v in vals):
+        raise ValueError("face tuning parameters must be finite")
+    if not (0 <= FACE_CENTER_X <= 1 and 0 <= FACE_CENTER_Y <= 1 and 0 < FACE_REGION_WIDTH <= 1 and 0 < FACE_REGION_HEIGHT <= 1 and 0 <= FACE_IMPORTANCE <= 10 and 0 <= PORTRAIT_PHOTO_OPACITY <= 1 and 0 < FACIAL_DETAIL_STRENGTH <= 3 and 0 <= PARTICLE_OVERLAY_OPACITY <= 1):
+        raise ValueError("face tuning parameters out of range")
+
+def face_region():
+    yy, xx = np.mgrid[0:SIZE, 0:SIZE].astype(np.float32)
+    return np.exp(-0.5 * (((xx / SIZE - FACE_CENTER_X) / (FACE_REGION_WIDTH / 2)) ** 2 + ((yy / SIZE - FACE_CENTER_Y) / (FACE_REGION_HEIGHT / 2)) ** 2)).astype(np.float32)
+
+
 # ---------------------------------------------------------------- configuration
 SIZE = 512                 # square output; logo remains particle-rendered
 N_PARTICLES = 10000
@@ -205,24 +227,24 @@ def prepare_portrait(img: Image.Image, crop: tuple[int, int, int, int] | None) -
 
 
 def photographic_layer(img: Image.Image, invert: bool = False) -> Image.Image:
-    """Preserve real facial detail; remove near-black studio background without a vignette."""
+    """Shared-crop grayscale photo with gentle local contrast and no radial clipping."""
     gray = ImageOps.autocontrast(img.convert("L"), cutoff=0.5)
-    gray = ImageEnhance.Contrast(gray).enhance(1.10)
-    arr = np.asarray(gray, dtype=np.float32) / 255.0
-    rgb = np.asarray(img, dtype=np.float32) / 255.0
-    # Black background suppression is photometric, never radial/elliptical.
-    foreground = smoothstep((rgb.max(axis=2) - 0.025) / 0.10)
+    g = np.asarray(gray, dtype=np.float32) / 255.0
+    local = np.asarray(gray.filter(ImageFilter.GaussianBlur(8)), dtype=np.float32) / 255.0
+    detail = np.clip(g + (FACIAL_DETAIL_STRENGTH - 1) * (g - local), 0, 1)
+    face = face_region()
+    g = np.clip(g * (1 - face * 0.65) + detail * (face * 0.65), 0, 1)
     if invert:
-        arr = 1.0 - arr
-    # Dark features remain dark, rather than becoming bright point clusters.
-    luminance = np.clip(arr * foreground, 0, 1)
-    target = np.asarray(BG, dtype=np.float32)[None, None, :]
-    image = target + luminance[..., None] * (np.asarray(SILVER, dtype=np.float32) - target)
-    image = Image.fromarray(np.uint8(np.clip(image, 0, 255)), "RGB")
+        g = 1 - g
+    rgb = np.asarray(img, dtype=np.float32) / 255.0
+    foreground = smoothstep((rgb.max(axis=2) - 0.025) / 0.10)
+    luminance = np.clip(g * foreground, 0, 1)
+    bg = np.asarray(BG, dtype=np.float32)
+    color = bg + luminance[..., None] * (np.asarray(SILVER, dtype=np.float32) - bg)
+    image = Image.fromarray(np.uint8(np.clip(color, 0, 255)), "RGB")
     side = int(round(FIELD * SIZE))
     canvas = Image.new("RGB", (SIZE, SIZE), BG)
-    image = image.resize((side, side), Image.Resampling.LANCZOS)
-    canvas.paste(image, ((SIZE-side)//2, (SIZE-side)//2))
+    canvas.paste(image.resize((side, side), Image.Resampling.LANCZOS), ((SIZE-side)//2, (SIZE-side)//2))
     return canvas
 
 
@@ -253,13 +275,10 @@ def portrait_density(img: Image.Image, crop: tuple[int, int, int, int] | None,
     if sil is not None:
         foreground = np.maximum(foreground, 0.80 * sil)
 
-    # Preserve features in the central face. Avoid interpreting shoulders as a
-    # more important target merely because they occupy more image area.
+    # Configurable importance field, never a clipping mask.
     yy, xx = np.mgrid[0:512, 0:512].astype(np.float32)
-    # A broad soft facial PRIOR, not a clipping mask: shoulders stay visible.
-    face_prior = np.exp(-0.5 * (((xx - 256) / 118) ** 2 +
-                                ((yy - 202) / 145) ** 2))
-    weight = 0.35 + 3.0 * face_prior
+    face_prior = face_region()
+    weight = 0.45 + FACE_IMPORTANCE * face_prior
     weighted_edges = edge * foreground
     density = ((0.45 * lum ** 1.5 + 1.05 * weighted_edges) *
                foreground * weight)
@@ -278,6 +297,8 @@ def portrait_density(img: Image.Image, crop: tuple[int, int, int, int] | None,
 
 def sample_portrait(density: np.ndarray, lum: np.ndarray, n: int,
                     rng: np.random.Generator) -> tuple[np.ndarray, np.ndarray]:
+    # Cap extreme weights to prevent bright point clusters.
+    density = np.minimum(density, np.percentile(density, 99.5))
     w = density.ravel().astype(np.float64) + 1e-9
     w /= w.sum()
     idx = rng.choice(w.size, size=n, p=w)
@@ -427,7 +448,14 @@ def build_frames(logo_pts, portrait_pts, portrait_bright, rng, photo: Image.Imag
         elif name == "dissolve2":
             photo_alpha = 0.94 * (1.0 - float(smoothstep(np.asarray(min(1.0, u / 0.65)))))
         if photo_alpha > 0:
+            # Photo supplies facial structure, particles remain a subtle overlay.
+            photo_alpha *= PORTRAIT_PHOTO_OPACITY / 0.94
+            photo_alpha = float(np.clip(photo_alpha, 0, 1))
             particle_frame = Image.blend(particle_frame, photo, photo_alpha)
+            if name == "portrait":
+                # Preserve the original dark eye/mouth pixels against bright particles.
+                particle_frame = Image.blend(particle_frame, photo, 1 - PARTICLE_OVERLAY_OPACITY)
+
         # GIF frames share a fixed palette; preview uses the identical compositing path.
         frames.append(particle_frame.quantize(palette=render(pos[:0], br[:0]), dither=Image.Dither.NONE))
     return frames
@@ -449,6 +477,10 @@ def main() -> None:
     ap.add_argument("--check-only", action="store_true", help="print portrait quality report and exit")
     ap.add_argument("--allow-low-quality", action="store_true", help="do not stop on portrait quality warnings")
     args = ap.parse_args()
+    try:
+        validate_tuning()
+    except ValueError as exc:
+        ap.error(str(exc))
 
     portrait_path = args.portrait
     if portrait_path is None:
@@ -489,6 +521,7 @@ def main() -> None:
             directory.mkdir(parents=True, exist_ok=True)
             frames[0].convert("RGB").save(directory / "preview-logo.png")
             frames[1].convert("RGB").save(directory / "preview-portrait.png")
+            frames[1].convert("RGB").resize((360, 360), Image.Resampling.LANCZOS).save(directory / "preview-portrait-readme.png")
         except OSError as exc:
             sys.exit(f"[error] preview writing failed: {exc}")
         print(f"[done] previews written to {directory}")
