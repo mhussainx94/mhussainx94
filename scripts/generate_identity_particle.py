@@ -11,8 +11,8 @@ motion you see is real particle movement, not a cross-fade.
 Dependencies: Pillow, NumPy only.
 
 Inputs (defaults, relative to the repository root):
-    assets/source/kali-logo.png    Kali dragon logo as PNG (transparent background preferred)
-    assets/source/portrait.jpg     your portrait (.jpg/.jpeg/.png), the higher resolution the better
+    assets/kali-logo.png    Kali dragon logo as PNG (transparent background preferred)
+    assets/portrait.jpg     your portrait (.jpg/.jpeg/.png), the higher resolution the better
 
 Usage:
     python scripts/generate_identity_particle.py
@@ -366,10 +366,10 @@ def build_frames(logo_pts, portrait_pts, portrait_bright, rng) -> list[Image.Ima
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--logo", type=Path, default=ROOT / "assets/source/kali-logo.png")
+    ap.add_argument("--logo", type=Path, default=ROOT / "assets/kali-logo.png")
     ap.add_argument("--logo-url", default=None, help="optional PNG URL used only if --logo is missing")
     ap.add_argument("--logo-invert", action="store_true", help="logo is light on a dark opaque background")
-    ap.add_argument("--portrait", type=Path, default=None, help="default: assets/source/portrait.{jpg,jpeg,png}")
+    ap.add_argument("--portrait", type=Path, default=None, help="default: assets/portrait.{jpg,jpeg,png}")
     ap.add_argument("--portrait-url", default=None, help="optional image URL used only if no portrait file exists")
     ap.add_argument("--portrait-crop", default=None, help="x,y,w,h crop box in source pixels (square recommended)")
     ap.add_argument("--portrait-invert", action="store_true")
@@ -383,7 +383,7 @@ def main() -> None:
     portrait_path = args.portrait
     if portrait_path is None:
         for ext in ("jpg", "jpeg", "png"):
-            cand = ROOT / f"assets/source/portrait.{ext}"
+            cand = ROOT / f"assets/portrait.{ext}"
             if cand.exists():
                 portrait_path = cand
                 break
