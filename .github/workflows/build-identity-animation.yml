@@ -1,0 +1,49 @@
+name: build-identity-animation
+
+# Rebuilds assets/identity-particle.gif when the generator or its source images change.
+# The GIF itself is NOT in the trigger paths, and pushes made with GITHUB_TOKEN do not
+# start new workflow runs, so this cannot loop.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/generate_identity_particle.py"
+      - "assets/source/**"
+      - ".github/workflows/build-identity-animation.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-identity-animation
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: python -m pip install --upgrade pip pillow numpy
+
+      - name: Generate animation
+        run: python scripts/generate_identity_particle.py
+
+      - name: Commit GIF if it changed
+        run: |
+          if git diff --quiet -- assets/identity-particle.gif && [ -z "$(git ls-files --others --exclude-standard assets/identity-particle.gif)" ]; then
+            echo "No change to assets/identity-particle.gif"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/identity-particle.gif
+          git commit -m "chore: rebuild identity particle animation"
+          git push

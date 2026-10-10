@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="540" viewBox="0 0 900 540" role="img" aria-labelledby="t d">
+  <title id="t">Personal cybersecurity lab architecture</title>
+  <desc id="d">A physical laptop hosts a Windows 11 install running VMware Workstation with seven virtual machines and three network modes, plus bare-metal Kali Linux and Debian, and two portable live USB environments, Tails and Kali.</desc>
+  <style>
+    text { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+    .bg { fill: #0d0d0f; }
+    .panel { fill: #131316; stroke: #3a3d42; stroke-width: 1.2; }
+    .inner { fill: #18181c; stroke: #4a4e54; stroke-width: 1.2; }
+    .box { fill: #1d1e23; stroke: #5a5f66; stroke-width: 1; }
+    .root { fill: #e6e8ea; }
+    .line { stroke: #6b7076; stroke-width: 1.4; fill: none; }
+    .h { fill: #8b9096; font-size: 11px; letter-spacing: 1.6px; }
+    .t { fill: #e6e8ea; font-size: 14px; }
+    .rt { fill: #0d0d0f; font-size: 14px; font-weight: 700; letter-spacing: 1.5px; }
+    .net { fill: #7fae93; font-size: 12px; letter-spacing: 1px; }
+    .strip { fill: #101214; stroke: #3d5247; stroke-width: 1; stroke-dasharray: 4 3; }
+  </style>
+  <rect class="bg" width="900" height="540" rx="10"/>
+
+  <!-- connectors -->
+  <path class="line" d="M450 68 V96 M300 96 H582 M300 96 V120 M582 96 V365 M582 195 H600 M582 365 H600"/>
+
+  <!-- root -->
+  <rect class="root" x="330" y="24" width="240" height="44" rx="4"/>
+  <text class="rt" x="450" y="51" text-anchor="middle">PHYSICAL LAPTOP</text>
+
+  <!-- Windows 11 -->
+  <rect class="panel" x="40" y="120" width="520" height="380" rx="6"/>
+  <text class="h" x="60" y="146">BARE METAL  //  WINDOWS 11</text>
+
+  <rect class="inner" x="64" y="170" width="472" height="310" rx="6"/>
+  <text class="h" x="84" y="194">VMWARE WORKSTATION</text>
+
+  <rect class="box" x="84"  y="210" width="208" height="40" rx="4"/><text class="t" x="102" y="235">Kali-NAT</text>
+  <rect class="box" x="308" y="210" width="208" height="40" rx="4"/><text class="t" x="326" y="235">Kali-Bridged</text>
+  <rect class="box" x="84"  y="262" width="208" height="40" rx="4"/><text class="t" x="102" y="287">Kali-Host-Only</text>
+  <rect class="box" x="308" y="262" width="208" height="40" rx="4"/><text class="t" x="326" y="287">Metasploitable</text>
+  <rect class="box" x="84"  y="314" width="208" height="40" rx="4"/><text class="t" x="102" y="339">Windows 10 + DVWA</text>
+  <rect class="box" x="308" y="314" width="208" height="40" rx="4"/><text class="t" x="326" y="339">Ubuntu</text>
+  <rect class="box" x="84"  y="366" width="208" height="40" rx="4"/><text class="t" x="102" y="391">Ubuntu Server</text>
+
+  <rect class="strip" x="84" y="428" width="432" height="34" rx="4"/>
+  <text class="net" x="300" y="450" text-anchor="middle">NETWORKING  //  NAT  ·  BRIDGED  ·  HOST-ONLY</text>
+
+  <!-- Bare metal, other OSes -->
+  <rect class="panel" x="600" y="120" width="260" height="150" rx="6"/>
+  <text class="h" x="620" y="146">BARE METAL  //  TRIPLE-BOOT</text>
+  <rect class="box" x="620" y="162" width="220" height="40" rx="4"/><text class="t" x="638" y="187">Kali Linux</text>
+  <rect class="box" x="620" y="214" width="220" height="40" rx="4"/><text class="t" x="638" y="239">Debian Linux</text>
+
+  <!-- Portable -->
+  <rect class="panel" x="600" y="290" width="260" height="150" rx="6"/>
+  <text class="h" x="620" y="316">PORTABLE  //  LIVE USB</text>
+  <rect class="box" x="620" y="332" width="220" height="40" rx="4"/><text class="t" x="638" y="357">Tails Live USB</text>
+  <rect class="box" x="620" y="384" width="220" height="40" rx="4"/><text class="t" x="638" y="409">Kali Live USB</text>
+
+  <text class="h" x="600" y="474">ARCHITECTURE ONLY</text>
+  <text class="h" x="600" y="492">TEST STATUS: SEE README</text>
+</svg>
