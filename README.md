@@ -33,15 +33,11 @@
 
 ## Security focus
 
-Direction, not a claim of expertise. I keep these three things separate on purpose.
+<div align="center">
 
-| | |
-| --- | --- |
-| **Hands-on now** | Built a Python security scanner for Odoo deployments · operate and document a multi-OS personal cyber lab (infrastructure) · TryHackMe practice · Secure SDLC and application security assessment exposure during a security internship |
-| **Developing toward** | Professional penetration testing · application security · authorized security assessments · vulnerability research · bug bounty methodology |
-| **Planned** | API security testing · cloud security labs · Active Directory · container / Docker security · CI/CD security · malware analysis · SOC / blue-team exercises · detection engineering |
+<img src="assets/security-focus-terminal.svg" width="1000" alt="Security focus terminal: hands-on now, developing toward and planned security learning, with clearly separated status groups" />
 
-Primary areas: Web Application Security · Vulnerability Assessment · Penetration Testing · Application Security · Secure SDLC · API Security · Security Automation · Linux Security.
+</div>
 
 ---
 
