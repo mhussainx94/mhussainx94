@@ -43,107 +43,47 @@
 
 ## Projects
 
-### Security engineering
-
-#### [Odoo Security Scanner](https://github.com/mhussainx94/odoo-security-scanner) `v2.0`
-
-A vulnerability-assessment tool for Odoo deployments, written in Python with a Flask interface and a CLI.
-
-| | |
-| --- | --- |
-| **Problem** | A repeatable way to assess an Odoo deployment's exposure and configuration |
-| **Tests** | Open ports and services · SSL/TLS · HTTP security headers · cookies · Odoo-specific endpoints · authentication · matching against a bundled CVE database |
-| **Produces** | JSON, TXT and HTML reports |
-| **Why it matters** | Brings network, transport, HTTP and application-level checks into one tool with machine-readable and human-readable output |
-
-<!-- PENDING: verify every line above against odoo-security-scanner/README.md and source. Capabilities come from my brief, not from the repo. -->
-
-#### [Personal Cybersecurity Lab](https://github.com/mhussainx94/personal-cyber-lab) `Active / Evolving`
-
-A personally operated lab for hands-on learning in web security, network security, vulnerability assessment and penetration testing. It is a real multi-OS architecture, not a list of installed tools.
-
 <div align="center">
-<img src="assets/cyber-lab-architecture.svg" width="860" alt="Lab architecture: a physical laptop runs Windows 11 with VMware Workstation hosting Kali-NAT, Kali-Bridged, Kali-Host-Only, Metasploitable, Windows 10 with DVWA, Ubuntu and Ubuntu Server over NAT, Bridged and Host-Only networking. The same laptop triple-boots Kali Linux and Debian, and uses Tails and Kali live USB environments." />
+
+<img src="assets/projects-terminal.svg" width="1000" alt="Terminal dashboard summarizing security engineering, research, and systems projects" />
+
 </div>
 
-<br>
+**Explore the repositories:** [Odoo Security Scanner](https://github.com/mhussainx94/odoo-security-scanner) · [Personal Cybersecurity Lab](https://github.com/mhussainx94/personal-cyber-lab) · [VDP-PRO Safe Recon](https://github.com/mhussainx94/vdp-pro-safe-recon) · [Onion Web Crawler](https://github.com/mhussainx94/onion-web-crawler) · [TryHackMe](https://github.com/mhussainx94/TryHackMe) · [CipherLog Assembly](https://github.com/mhussainx94/CipherLog-Assembly) · [Portfolio](https://github.com/mhussainx94/mhussainx94-portfolio)
+
+<details>
+<summary><b>Personal Cybersecurity Lab — architecture and current status</b></summary>
+
+<img src="assets/cyber-lab-architecture.svg" width="860" alt="Personal cybersecurity lab architecture diagram" />
 
 Windows 11, Kali Linux and Debian are separate operating systems on one triple-boot machine. Tails and Kali run as independent live-boot USB environments. VMware Workstation runs under Windows 11.
 
-**Honest status.** The infrastructure exists. Testing on it has not started.
+**Documented lab status:** Infrastructure and architecture documentation are active; testing milestones in the original README were marked not yet tested or planned.
 
-| Area | Status |
-| ---- | ------ |
-| Infrastructure | `ACTIVE` |
-| Architecture documentation | `ACTIVE` |
-| Web security testing (DVWA) | `NOT YET TESTED` |
-| Network security testing | `NOT YET TESTED` |
-| Vulnerability assessment | `NOT YET TESTED` |
-| Penetration testing | `NOT YET TESTED` |
-| Security automation | `PLANNED` |
-
-### Security automation and research
-
-#### [VDP-PRO Safe Recon](https://github.com/mhussainx94/vdp-pro-safe-recon)
-
-Authorized, passive reconnaissance and security automation in **Bash**, built around a repeatable workflow and a safe testing methodology. It is a personal workflow project, not an offensive reconnaissance platform.
-
-<!-- PENDING: add concrete behaviour (inputs, outputs, what it does and does not touch) from vdp-pro-safe-recon/README.md and main script. -->
-
-#### [Onion Web Crawler](https://github.com/mhussainx94/onion-web-crawler)
-
-A research and security-tooling project in **Python** that works over **Tor**.
-
-<!-- PENDING: one sentence on the technical purpose (what it crawls, what it records, how) from onion-web-crawler/README.md. -->
-
-### Hands-on security learning
-
-#### [TryHackMe](https://github.com/mhussainx94/TryHackMe)
-
-Documented practical labs and applied learning on security concepts.
-
-<!-- PENDING: name the rooms/paths actually completed, from the TryHackMe repo contents. -->
-
-### Systems and technical projects
-
-#### [CipherLog Assembly](https://github.com/mhussainx94/CipherLog-Assembly)
-
-A lower-level, systems-oriented project written in assembly.
-
-<!-- PENDING: describe what it does from CipherLog-Assembly/README.md (architecture, assembler, purpose). -->
-
-#### [Portfolio](https://github.com/mhussainx94/mhussainx94-portfolio)
-
-Personal portfolio site: [mhussainx94-portfolio.vercel.app](https://mhussainx94-portfolio.vercel.app)
+</details>
 
 ---
 
 ## Experience
 
-**Software Security Intern** · National CERT, Pakistan
+<div align="center">
 
-<!-- PENDING: add dates and location if you want them shown. -->
+<img src="assets/experience-terminal.svg" width="1000" alt="Terminal dashboard of National CERT software security internship exposure" />
 
-- Exposure to Secure SDLC practices
-- Exposure to application security assessment
-- Vulnerability identification and remediation-oriented work
-- Security testing methodologies and industry-standard security tools
+</div>
 
 ---
 
 ## Security profile
 
-Grouped by domain. Not rated: the evidence is in the projects above.
+<div align="center">
 
-| Domain | Areas |
-| ------ | ----- |
-| **Web and application security** | Web Application Security · OWASP Top 10 · VAPT · Secure SDLC · Vulnerability Identification · Remediation |
-| **Security testing** | Burp Suite · OWASP ZAP · Nmap · Vulnerability Assessment · Network Scanning · Security Testing Methodologies |
-| **Programming and automation** | Python · Bash · SQL |
-| **Operating systems** | Kali Linux · Linux · Windows |
-| **Networking** | Computer Networking · Network Security · TCP/IP fundamentals · Network Scanning |
+<img src="assets/profile-terminal.svg" width="1000" alt="Terminal dashboard grouping web security, testing, programming and operating systems" />
 
-<!-- PENDING: Burp Suite, OWASP ZAP, Nmap and SQL come from my brief's example list. Confirm each is something you have actually used before publishing. -->
+</div>
+
+<details>
+<summary><b>Skills and tools — technology badges</b></summary>
 
 ### Skills and tools
 
@@ -151,6 +91,8 @@ Grouped by domain. Not rated: the evidence is in the projects above.
 
 ![C++](https://img.shields.io/badge/C++-00599C?style=flat&logo=cplusplus&logoColor=white) ![Java](https://img.shields.io/badge/Java-ED8B00?style=flat&logo=openjdk&logoColor=white) ![MIPS Assembly](https://img.shields.io/badge/MIPS_Assembly-525252?style=flat&logoColor=white) ![SQL](https://img.shields.io/badge/SQL-336791?style=flat&logo=postgresql&logoColor=white) ![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=flat&logo=githubactions&logoColor=white) ![VMware](https://img.shields.io/badge/VMware-607078?style=flat&logo=vmware&logoColor=white) ![Ubuntu](https://img.shields.io/badge/Ubuntu-E95420?style=flat&logo=ubuntu&logoColor=white) ![Debian](https://img.shields.io/badge/Debian-A81D33?style=flat&logo=debian&logoColor=white) ![Fedora](https://img.shields.io/badge/Fedora-51A2DA?style=flat&logo=fedora&logoColor=white) ![Metasploit](https://img.shields.io/badge/Metasploit-2596CD?style=flat&logo=metasploit&logoColor=white) ![OpenVAS](https://img.shields.io/badge/OpenVAS-008B5A?style=flat&logoColor=white) ![TryHackMe](https://img.shields.io/badge/TryHackMe-212C42?style=flat&logo=tryhackme&logoColor=white) ![Hack The Box](https://img.shields.io/badge/Hack_The_Box-9FEF00?style=flat&logo=hackthebox&logoColor=black) ![Cloudflare](https://img.shields.io/badge/Cloudflare-F38020?style=flat&logo=cloudflare&logoColor=white) ![AWS](https://img.shields.io/badge/AWS-232F3E?style=flat&logo=amazonwebservices&logoColor=white) ![Next.js](https://img.shields.io/badge/Next.js-000000?style=flat&logo=nextdotjs&logoColor=white) ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat&logo=typescript&logoColor=white) ![n8n](https://img.shields.io/badge/n8n-EA4B71?style=flat&logo=n8n&logoColor=white) ![Postman](https://img.shields.io/badge/Postman-FF6C37?style=flat&logo=postman&logoColor=white) ![Packet Tracer](https://img.shields.io/badge/Packet_Tracer-0078D4?style=flat&logo=cisco&logoColor=white)
 **Security disciplines:** Web Application Security · Penetration Testing · Vulnerability Assessment · OWASP Top 10 · Application Security · Secure SDLC · Network Security · Security Automation
+
+</details>
 
 ### Learning path
 
@@ -163,24 +105,20 @@ Linux → Networking → HTTP/HTTPS → Web Applications → Authentication & Au
 
 ## Certifications
 
-| Certification | Issuer | Issued |
-| ------------- | ------ | ------ |
-| Google Cybersecurity | Google | Dec 2025 |
-| Tools of the Trade: Linux and SQL | Google | Dec 2025 |
-| Cybersecurity for Everyone | University of Maryland | Aug 2025 |
-| Kali Linux | Coursera / Board Infinity | Jul 2025 |
-| CyberSecurity | Asian Development Bank | Jun 2025 |
-| Generative AI Essentials | IBM | Aug 2025 |
-| Data Analyst | OneRoadmap | May 2025 |
+<div align="center">
 
-<!-- ISC2 Candidate is deliberately omitted: its listed validity ended July 2026. -->
+<img src="assets/certifications-terminal.svg" width="1000" alt="Terminal dashboard listing certification issuers and dates" />
 
-<!-- PENDING: Education section. The brief was cut off at "National University of Technol...". Send the full degree, institution and dates. -->
+</div>
 
 ---
 
 ## Connect
 
-[GitHub](https://github.com/mhussainx94) · [Portfolio](https://mhussainx94-portfolio.vercel.app)
+<div align="center">
 
-<!-- PENDING: add LinkedIn (and any other link you want) once you send the URL. -->
+<img src="assets/connect-terminal.svg" width="1000" alt="Terminal dashboard with GitHub and portfolio addresses" />
+
+</div>
+
+[GitHub](https://github.com/mhussainx94) · [Portfolio](https://mhussainx94-portfolio.vercel.app)
