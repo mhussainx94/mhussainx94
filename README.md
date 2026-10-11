@@ -58,8 +58,6 @@
 
 Windows 11, Kali Linux and Debian are separate operating systems on one triple-boot machine. Tails and Kali run as independent live-boot USB environments. VMware Workstation runs under Windows 11.
 
-**Documented lab status:** Infrastructure and architecture documentation are active; testing milestones in the original README were marked not yet tested or planned.
-
 </details>
 
 ---
