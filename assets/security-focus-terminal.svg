@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="615" viewBox="0 0 1000 615" role="img" aria-labelledby="title desc">
+<title id="title">Security focus — practical work, development goals and future plans</title>
+<desc id="desc">Terminal-themed readable dashboard separating hands-on experience, developing capabilities, and planned learning.</desc>
+<rect width="1000" height="615" rx="16" fill="#0d1117"/>
+<rect x="1" y="1" width="998" height="613" rx="15" fill="none" stroke="#30363d" stroke-width="2"/>
+<path d="M16 1H984Q999 1 999 16V49H1V16Q1 1 16 1Z" fill="#161b22"/>
+<path d="M1 49H999" stroke="#30363d"/>
+<circle cx="26" cy="25" r="6" fill="#ff5f57"/><circle cx="47" cy="25" r="6" fill="#febc2e"/><circle cx="68" cy="25" r="6" fill="#28c840"/>
+<g font-family="DejaVu Sans Mono,Consolas,monospace">
+<text x="500" y="30" fill="#a9b4c2" font-size="15" text-anchor="middle">hussain@kali: ~/security/focus</text>
+<text x="34" y="85" fill="#79c0ff" font-size="17">┌──(hussain㉿kali)-[~/security/focus]</text>
+<text x="34" y="114" fill="#3fb950" font-size="17">└─$ cat roadmap.txt</text>
+<text x="34" y="153" fill="#e6edf3" font-size="22" font-weight="bold">SECURITY FOCUS</text>
+<text x="34" y="177" fill="#a9b4c2" font-size="14">Current practice, professional direction and future learning.</text>
+<path d="M34 194H966" stroke="#30363d"/>
+<rect x="30" y="211" width="940" height="110" rx="9" fill="#121e19" stroke="#274936"/>
+<rect x="46" y="226" width="10" height="10" rx="2" fill="#3fb950"/>
+<text x="68" y="237" fill="#7ee2a8" font-size="17" font-weight="bold">01  HANDS-ON NOW</text>
+<g fill="#e6edf3" font-size="15">
+<text x="48" y="265">Python Odoo security scanner  ·  Multi-OS cyber lab and documentation</text>
+<text x="48" y="290">TryHackMe practice  ·  Secure SDLC and application security internship exposure</text>
+</g>
+<rect x="30" y="334" width="940" height="110" rx="9" fill="#151b27" stroke="#2b456a"/>
+<rect x="46" y="349" width="10" height="10" rx="2" fill="#79c0ff"/>
+<text x="68" y="360" fill="#91c7ff" font-size="17" font-weight="bold">02  DEVELOPING TOWARD</text>
+<g fill="#e6edf3" font-size="15">
+<text x="48" y="388">Professional penetration testing  ·  Application security</text>
+<text x="48" y="413">Authorized assessments  ·  Vulnerability research  ·  Bug bounty methodology</text>
+</g>
+<rect x="30" y="457" width="940" height="103" rx="9" fill="#1c1b19" stroke="#50432a"/>
+<rect x="46" y="472" width="10" height="10" rx="2" fill="#d9ae64"/>
+<text x="68" y="483" fill="#f1c77e" font-size="17" font-weight="bold">03  PLANNED</text>
+<g fill="#e6edf3" font-size="14">
+<text x="48" y="511">API security  ·  Cloud security labs  ·  Active Directory  ·  Docker security</text>
+<text x="48" y="536">CI/CD security  ·  Malware analysis  ·  SOC exercises  ·  Detection engineering</text>
+</g>
+<text x="34" y="591" fill="#a9b4c2" font-size="14">Core: Web App Security · VAPT · Secure SDLC · API Security · Automation · Linux</text>
+</g>
+</svg>
